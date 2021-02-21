@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         home: SafeArea(
           child: Scaffold(
             appBar: AppBar(
-              title: Text('OEKAKI APP'),
+              title: Text('お絵描きApp'),
             ),
             body: IndexScreen(),
           ),

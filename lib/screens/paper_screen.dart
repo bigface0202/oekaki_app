@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../components/palette.dart';
 import '../components/paper.dart';
 import '../components/icon_pallete.dart';
-import '../components/selected_image.dart';
 import '../models/strokes_model.dart';
 
 class PaperScreen extends StatelessWidget {
@@ -18,6 +17,16 @@ class PaperScreen extends StatelessWidget {
     final strokes = Provider.of<StrokesModel>(context);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('お絵描きApp'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: () {},
+            color: Colors.white,
+          ),
+        ],
+      ),
       body: Stack(
         children: <Widget>[
           // Align(

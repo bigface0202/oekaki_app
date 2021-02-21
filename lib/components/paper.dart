@@ -10,6 +10,7 @@ class Paper extends StatelessWidget {
   final image;
   final width;
   final height;
+  GlobalKey _keyPaper = GlobalKey();
 
   Paper(this.image, this.width, this.height);
   @override
@@ -22,44 +23,71 @@ class Paper extends StatelessWidget {
     return Listener(
       // onPointerDownは画面に指が触れた時にコールされる
       onPointerDown: (details) {
-        if (details.position.dy < height) {
-          strokes.add(pen, details.position, iconProv);
-        }
+        final RenderBox box = _keyPaper.currentContext.findRenderObject();
+        Offset localPaper = box.globalToLocal(details.position);
+        strokes.add(pen, localPaper, iconProv);
       },
       // タッチでお絵かきしたいときは以下を使う
-      // onPointerMove: (details) {
-      //   strokes.update(details.position);
-      // },
-      // onPointerUp: (details) {
-      //   strokes.update(details.position);
-      // },
-      child: FittedBox(
-        child: SizedBox(
-          width: image.width.toDouble(),
-          height: image.height.toDouble(),
-          child: CustomPaint(
-            painter: _Painter(image, strokes, displaySize),
+      onPointerMove: (details) {
+        final RenderBox box = _keyPaper.currentContext.findRenderObject();
+        Offset localPaper = box.globalToLocal(details.position);
+        strokes.update(localPaper);
+      },
+      onPointerUp: (details) {
+        final RenderBox box = _keyPaper.currentContext.findRenderObject();
+        Offset localPaper = box.globalToLocal(details.position);
+        strokes.update(localPaper);
+      },
+      child: Stack(
+        children: [
+          FittedBox(
+            child: SizedBox(
+              width: image.width.toDouble(),
+              height: image.height.toDouble(),
+              child: CustomPaint(
+                painter: _ImagePainter(image),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints.expand(),
+                ),
+              ),
+            ),
+          ),
+          CustomPaint(
+            key: _keyPaper,
+            painter: _Painter(strokes),
             child: ConstrainedBox(
               constraints: BoxConstraints.expand(),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class _Painter extends CustomPainter {
-  final StrokesModel strokes;
+class _ImagePainter extends CustomPainter {
   final ui.Image _image;
-  final Size _displaySize;
 
-  _Painter(this._image, this.strokes, this._displaySize);
-
+  _ImagePainter(this._image);
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
     canvas.drawImage(_image, Offset(0, 0), paint);
+  }
+
+  @override
+  bool shouldRepaint(_ImagePainter oldDelegate) {
+    return false;
+  }
+}
+
+class _Painter extends CustomPainter {
+  final StrokesModel strokes;
+
+  _Painter(this.strokes);
+
+  @override
+  void paint(Canvas canvas, Size size) {
     strokes.all.forEach((stroke) {
       final icon = stroke.icon;
       final textStyle = ui.TextStyle(
@@ -72,17 +100,15 @@ class _Painter extends CustomPainter {
         ..pushStyle(textStyle)
         ..addText(String.fromCharCode(icon.codePoint));
       var para = builder.build();
-      para.layout(const ui.ParagraphConstraints(width: 60));
-      // final paint = Paint()
-      //   ..color = stroke.color
-      //   ..strokeCap = StrokeCap.round
-      //   ..strokeWidth = 3;
+      para.layout(ui.ParagraphConstraints(width: size.width));
+      final paint = Paint()
+        ..color = stroke.color
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 3;
       // canvas.drawPoints(ui.PointMode.polygon, stroke.points, paint);
       // canvas.drawParagraph(para, stroke.points[0]);
       canvas.drawParagraph(
-          para,
-          Offset(stroke.points[0].dx * size.width / _displaySize.width,
-              stroke.points[0].dy * size.width / _displaySize.width));
+          para, Offset(stroke.points[0].dx, stroke.points[0].dy));
       // print('Width:${size.width}');
       // print('Height:${size.height}');
       // print('Display Width:${_displaySize.width}');
