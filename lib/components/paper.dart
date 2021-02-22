@@ -1,21 +1,22 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:oekaki_app/models/icon_model.dart';
 import 'package:provider/provider.dart';
+
 import '../models/pen_model.dart';
 import '../models/strokes_model.dart';
 
 class Paper extends StatelessWidget {
   final image;
-  final width;
-  final height;
+  // 画像のlocal positionを取得するためのキー
   GlobalKey _keyPaper = GlobalKey();
 
-  Paper(this.image, this.width, this.height);
+  Paper(this.image);
+
   @override
   Widget build(BuildContext context) {
-    final Size displaySize = MediaQuery.of(context).size;
     final pen = Provider.of<PenModel>(context);
     final strokes = Provider.of<StrokesModel>(context);
     final iconProv = Provider.of<IconModel>(context);
@@ -105,18 +106,8 @@ class _Painter extends CustomPainter {
         ..color = stroke.color
         ..strokeCap = StrokeCap.round
         ..strokeWidth = 3;
-      // canvas.drawPoints(ui.PointMode.polygon, stroke.points, paint);
-      // canvas.drawParagraph(para, stroke.points[0]);
       canvas.drawParagraph(
           para, Offset(stroke.points[0].dx, stroke.points[0].dy));
-      // print('Width:${size.width}');
-      // print('Height:${size.height}');
-      // print('Display Width:${_displaySize.width}');
-      // print('Display Height:${_displaySize.height}');
-      // print('Touched x: ${stroke.points[0].dx}');
-      // print('Touched y: ${stroke.points[0].dy}');
-      // print(stroke.points[0].dx * size.width / _displaySize.width);
-      // print(stroke.points[0].dy * size.height / _displaySize.height);
     });
   }
 
