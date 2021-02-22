@@ -100,8 +100,30 @@ class _PaperScreenState extends State<PaperScreen> {
           IconButton(
             icon: Icon(Icons.save),
             onPressed: () {
-              _requestPermission();
-              _exportToImage();
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text('画像を保存しますか'),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('はい'),
+                        onPressed: () {
+                          _requestPermission();
+                          _exportToImage();
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('いいえ'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
             },
             color: Colors.white,
           ),
@@ -131,7 +153,7 @@ class _PaperScreenState extends State<PaperScreen> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('削除します'),
+                title: Text('編集を削除します'),
                 actions: <Widget>[
                   FlatButton(
                     child: Text('Cancel'),
